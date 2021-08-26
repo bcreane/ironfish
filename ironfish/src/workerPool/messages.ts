@@ -2,110 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import type { Side } from '../merkletree/merkletree'
-import { Identity, PrivateIdentity } from '../network'
+import { BoxMessageRequest, BoxMessageResponse } from './tasks/boxMessage'
+import { CreateMinersFeeRequest, CreateMinersFeeResponse } from './tasks/createMinersFee'
+import { CreateTransactionRequest, CreateTransactionResponse } from './tasks/createTransaction'
+import { MineHeaderRequest, MineHeaderResponse } from './tasks/mineHeader'
+import { SleepRequest, SleepResponse } from './tasks/sleep'
+import { TransactionFeeRequest, TransactionFeeResponse } from './tasks/transactionFee'
+import { UnboxMessageRequest, UnboxMessageResponse } from './tasks/unboxMessage'
+import { VerifyTransactionRequest, VerifyTransactionResponse } from './tasks/verifyTransaction'
 
 /**
  * Request and response message types used for communication
  * between the worker pool and workers.
  */
 
-export type CreateMinersFeeRequest = {
-  type: 'createMinersFee'
-  spendKey: string
-  amount: bigint
-  memo: string
+export type JobAbortRequest = {
+  type: 'jobAbort'
 }
 
-export type CreateMinersFeeResponse = {
-  type: 'createMinersFee'
-  serializedTransactionPosted: Uint8Array
+export type JobErrorResponse = {
+  type: 'jobError'
+  error: unknown
 }
-
-export type CreateTransactionRequest = {
-  type: 'createTransaction'
-  spendKey: string
-  transactionFee: bigint
-  spends: {
-    note: Buffer
-    treeSize: number
-    rootHash: Buffer
-    authPath: {
-      side: Side
-      hashOfSibling: Buffer
-    }[]
-  }[]
-  receives: { publicAddress: string; amount: bigint; memo: string }[]
-}
-
-export type CreateTransactionResponse = {
-  type: 'createTransaction'
-  serializedTransactionPosted: Uint8Array
-}
-
-export type TransactionFeeRequest = {
-  type: 'transactionFee'
-  serializedTransactionPosted: Buffer
-}
-
-export type TransactionFeeResponse = {
-  type: 'transactionFee'
-  transactionFee: bigint
-}
-
-export type VerifyTransactionRequest = {
-  type: 'verify'
-  serializedTransactionPosted: Buffer
-}
-
-export type VerifyTransactionResponse = {
-  type: 'verify'
-  verified: boolean
-}
-
-export type BoxMessageRequest = {
-  type: 'boxMessage'
-  message: string
-  sender: PrivateIdentity
-  recipient: Identity
-}
-
-export type BoxMessageResponse = {
-  type: 'boxMessage'
-  nonce: string
-  boxedMessage: string
-}
-
-export type UnboxMessageRequest = {
-  type: 'unboxMessage'
-  boxedMessage: string
-  nonce: string
-  sender: Identity
-  recipient: PrivateIdentity
-}
-
-export type UnboxMessageResponse = {
-  type: 'unboxMessage'
-  message: string | null
-}
-
-export type MineHeaderRequest = {
-  type: 'mineHeader'
-  batchSize: number
-  headerBytesWithoutRandomness: Uint8Array
-  initialRandomness: number
-  miningRequestId: number
-  targetValue: string
-}
-
-export type MineHeaderResponse = {
-  type: 'mineHeader'
-  initialRandomness: number
-  miningRequestId?: number
-  randomness?: number
-}
-
-export type OmitRequestId<T> = Omit<T, 'requestId'>
 
 export type WorkerRequestMessage = {
   requestId: number
@@ -125,6 +43,8 @@ export type WorkerRequest =
   | BoxMessageRequest
   | UnboxMessageRequest
   | MineHeaderRequest
+  | SleepRequest
+  | JobAbortRequest
 
 export type WorkerResponse =
   | CreateMinersFeeResponse
@@ -134,3 +54,5 @@ export type WorkerResponse =
   | BoxMessageResponse
   | UnboxMessageResponse
   | MineHeaderResponse
+  | SleepResponse
+  | JobErrorResponse

@@ -31,8 +31,8 @@ export class Assert {
     }
   }
 
-  static isNever(x: never): never {
-    throw new Error(`Expected value to be never: ${JSON.stringify(x)}`)
+  static isNever(x: never, message?: string): never {
+    throw new Error(message || `Expected value to be never: ${JSON.stringify(x)}`)
   }
 
   static isTrue(x: boolean, message?: string): asserts x is true {
